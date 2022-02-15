@@ -52,6 +52,17 @@
         <b># of candy pieces collected:</b>
         <span id="candyCounter">0</span>
       </div>
+      <button type="button" class="settings-button" id="settings-button">Open settings panel</button>
+      <div class="settings-panel">
+        <form action="#">
+          Items thrown from parade float every 
+          <input type="text" id="item-freq" name="item-freq" value="2000">
+           milliseconds (min allowed value: 100)
+           <br>
+           <input type="submit" id="save" value="Save and close settings panel">
+           <input type="submit" id="discard" value="Discard and close settings panel">
+        </form>
+      </div>
     </div> <!-- end status-window -->
 
   </div> <!-- end outer-container -->

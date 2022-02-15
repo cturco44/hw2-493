@@ -17,25 +17,45 @@
 
 .throwingItem {
   position: absolute;
-  width: 50px;
+  width: 40px;
   height: 50px;
+  top: 0px;
+  left: 0px;
 }
 .throwingItem img {
   width: 40px;
   position: absolute;
-  top: 0px;
-  left: 0px;
+  top: 9px;
+  left: 8px;
   z-index: 0;
 
 }
-/* .throwingItem.circle img {
-    background: #383838;
-    padding: 30px;
-    border-radius: 50%;
-    display:block;
-    width:50px;
-    height:50px;
-} */
+
+.circle {
+  display: block;
+  height: 60px;
+  width: 60px;
+  line-height: 60px;
+
+  -moz-border-radius: 30px; /* or 50% */
+  border-radius: 30px; /* or 50% */
+
+  background-color: yellow;
+  color: white;
+  text-align: center;
+  font-size: 2em;
+}
+.settings-panel {
+  margin-top: 15px;
+  border: #ccc;
+  border-width: 2px;
+  border-style: solid;
+  display: none;
+
+}
+.settings-button {
+  margin-top: 15px;
+}
 #actualGame{
 
 }

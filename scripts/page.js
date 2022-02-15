@@ -89,6 +89,34 @@ $(document).ready( function() {
     checkCollisions();
   }, 100);
 
+  $("#settings-button").click(function() {
+    $(this).hide();
+    $('.settings-panel').show();
+  });
+  $("#discard").click(function(event) {
+    event.preventDefault()
+    $("#item-freq").val(currentThrowingFrequency);
+    $('.settings-panel').hide();
+    $('.settings-button').show();
+
+  });
+  $("#save").click(function(event) {
+    event.preventDefault()
+    let user_input = parseInt($("#item-freq").val());
+    if (user_input < 100) {
+      $("#item-freq").val(currentThrowingFrequency);
+      alert("Frequency must be a number greater than 100");
+    }
+    else {
+      currentThrowingFrequency = user_input;
+      $("#item-freq").val(currentThrowingFrequency);
+      clearInterval(createThrowingItemIntervalHandle);
+      createThrowingItemIntervalHandle = setInterval(createThrowingItem, currentThrowingFrequency);
+    }
+    $('.settings-panel').hide();
+    $('.settings-button').show();
+  });
+
   // Move the parade floats
   startParade();
 
@@ -126,6 +154,9 @@ function movePerson(arrow) {
       if (newPos < 0) {
         newPos = 0;
       }
+      if (willCollideFloat(player, paradeFloat1, paradeFloat2, -1 * PERSON_SPEED, 0)) {
+        break;
+      }
       player.css('left', newPos);
       break;
     }
@@ -133,6 +164,9 @@ function movePerson(arrow) {
       let newPos = parseInt(player.css('left'))+PERSON_SPEED;
       if (newPos > maxPersonPosX) {
         newPos = maxPersonPosX;
+      }
+      if (willCollideFloat(player, paradeFloat1, paradeFloat2, PERSON_SPEED, 0)) {
+        break;
       }
       player.css('left', newPos);
       break;
@@ -142,6 +176,9 @@ function movePerson(arrow) {
       if (newPos < 0) {
         newPos = 0;
       }
+      if (willCollideFloat(player, paradeFloat1, paradeFloat2, 0, -1 * PERSON_SPEED)) {
+        break;
+      }
       player.css('top', newPos);
       break;
     }
@@ -149,6 +186,9 @@ function movePerson(arrow) {
       let newPos = parseInt(player.css('top'))+PERSON_SPEED;
       if (newPos > maxPersonPosY) {
         newPos = maxPersonPosY;
+      }
+      if (willCollideFloat(player, paradeFloat1, paradeFloat2, 0, PERSON_SPEED)) {
+        break;
       }
       player.css('top', newPos);
       break;
@@ -161,12 +201,18 @@ function movePerson(arrow) {
 function checkCollisions() {
   $('.throwingItem' + '> img').each(function() {
     if(isColliding($(this), player)) {
-      let left = $(this).css("left");
-      let top = $(this).css("top");
-      $(this).parent().css("top", top);
-      $(this).parent().css("left", left);
+      if (!$(this).parent().hasClass('circle')) {
+        gwhScore.html(parseInt(gwhScore.text()) + 100);
+        if($(this).parent().hasClass('beads')) {
+          $('#beadsCounter').html(parseInt($('#beadsCounter').text()) + 1);
+        }
+        else {
+          $('#candyCounter').html(parseInt($('#candyCounter').text()) + 1);
+        }
+        
+      }
       $(this).parent().addClass('circle');
-      graduallyFadeAndRemoveElement($(this).parent());
+      graduallyFadeAndRemoveElement($(this).parent(), 1000);
     }
   });
 }
@@ -181,25 +227,27 @@ function startParade(){
     
     let float_one_location = parseInt(paradeFloat1.css('left'));
     let float_two_location = parseInt(paradeFloat2.css('left'));
-    if (float_two_location > game_width) {
-      paradeFloat2.css('left', -150);
+    if (!willCollide(paradeFloat2, player, FLOAT_SPEED, 0)) {
+      if (float_two_location > game_width) {
+        paradeFloat2.css('left', -150);
+      }
+      else if (float_two_location > float_one_location) {
+        paradeFloat2.css('left', newPos2);
+      }
+      
+      if (float_one_location < game_width) {
+        paradeFloat1.css('left', newPos1);
+      }
+      else {
+        paradeFloat1.css('left', -300);
+      }
     }
-    else if (float_two_location > float_one_location) {
-      paradeFloat2.css('left', newPos2);
-    }
-    
-    if (float_one_location < game_width) {
-      paradeFloat1.css('left', newPos1);
-    }
-    else {
-      paradeFloat1.css('left', -300);
-    }
+
     
 
       // TODO: (Depending on current position) update left value for each 
       // parade float, check for collision with player, etc.
-      checkCollisions()
-      console.log("hello")
+      checkCollisions();
       
 
   }, OBJECT_REFRESH_RATE);
@@ -207,8 +255,12 @@ function startParade(){
 
 // Get random position to throw object to, create the item, begin throwing
 function createThrowingItem(){
+  let float_two_location = parseInt(paradeFloat2.css("left"));
+  let game_width = $('.game-window').width();
+  if (float_two_location < -74 || float_two_location > game_width - 72) {
+    return;
+  }
   x_value = Math.floor(getRandomNumber(0, maxItemPosX));
-  console.log(x_value);
   y_value = Math.floor(getRandomNumber(0, maxItemPosY));
 
   let imageString;
@@ -222,8 +274,8 @@ function createThrowingItem(){
     imageString = "beads.png"
   }
   gwhGame.append(createItemDivString(throwingItemIdx, type, imageString));
-  let current_item = $('#i-'+ throwingItemIdx+ '> img');
-  let start_x = parseInt(paradeFloat2.css("left")) + FLOAT_2_WIDTH
+  let current_item = $('#i-'+ throwingItemIdx);
+  let start_x = parseInt(paradeFloat2.css("left")) + FLOAT_2_WIDTH - 50;
   let start_y = 230;
   current_item.css("left", start_x);
   current_item.css("top", start_y);
@@ -267,14 +319,14 @@ function updateThrownItemPosition(elementObj, xChange, yChange, iterationsLeft){
     setTimeout(function() {updateThrownItemPosition(elementObj, xChange, yChange, iterationsLeft - 1)}, OBJECT_REFRESH_RATE);
   }
   else {
-    setTimeout(function() {graduallyFadeAndRemoveElement(elementObj.parent())}, 5000);
+    setTimeout(function() {graduallyFadeAndRemoveElement(elementObj)}, 5000);
   }
   
 }
 
-function graduallyFadeAndRemoveElement(elementObj){
+function graduallyFadeAndRemoveElement(elementObj, time=2000){
   // Fade to 0 opacity over 2 seconds
-  elementObj.fadeTo(2000, 0, function(){
+  elementObj.fadeTo(time, 0, function(){
     $(this).remove();
   });
 }
@@ -317,6 +369,9 @@ function isOrWillCollide(o1, o2, o1_xChange, o1_yChange){
      return true;
   }
   return false;
+}
+function willCollideFloat(o1, o2, o3, o1_xChange, o1_yChange) {
+  return willCollide(o1, o2, o1_xChange, o1_yChange) || willCollide(o1, o3, o1_xChange, o1_yChange);
 }
 
 // Get random number between min and max integer
