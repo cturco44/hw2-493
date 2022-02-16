@@ -30,6 +30,11 @@
   z-index: 0;
 
 }
+.loading {
+  font-size: 50px;
+  text-align: center;
+  vertical-align: middle; 
+}
 
 .circle {
   display: block;

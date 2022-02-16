@@ -116,9 +116,13 @@ $(document).ready( function() {
     $('.settings-panel').hide();
     $('.settings-button').show();
   });
-
-  // Move the parade floats
-  startParade();
+  $("#actualGame").hide()
+  setTimeout(function() {
+    $("#actualGame").show();
+    $(".loading").hide();
+  }, 3000);
+  setTimeout(function() {startParade()}, 4000);
+  
 
   // Throw items onto the route at the specified frequency
   createThrowingItemIntervalHandle = setInterval(createThrowingItem, currentThrowingFrequency);
